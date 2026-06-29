@@ -1,6 +1,6 @@
 ---
 name: loop
-description: Design, review, implement, or operate Loop Engineering systems for agentic AI workflows. Use when asked to create a Loop, loop spec, recurring agent workflow, autonomous or scheduled agent run, verifier/evaluator, eval dataset, quality flywheel, run ledger, observability plan, failure taxonomy, loop manifest, escalation policy, cost/permission controls, 30/60/90 rollout, or when converting repeated prompt-driven work into a verified agent operating loop across Codex, MCP, CI, ticketing, support, sales, IT operations, documentation, or customer workflows.
+description: Design, review, implement, or operate Loop Engineering systems for agentic AI workflows. Use when asked to create a Loop, loop spec, recurring agent workflow, autonomous or scheduled agent run, verifier/evaluator, eval dataset, quality flywheel, run ledger, observability plan, failure taxonomy, loop manifest, escalation policy, scaffold/eval/deploy/publish workflow, agent toolchain, cost/permission controls, 30/60/90 rollout, or when converting repeated prompt-driven work into a verified agent operating loop across Codex, MCP, CI, ticketing, support, sales, IT operations, documentation, or customer workflows.
 ---
 
 # Loop Engineering
@@ -19,43 +19,47 @@ Design for verifiability before autonomy. A model ending its turn is not proof t
 2. Define the loop contract.
    - Specify goal, trigger, input source, allowed scope, forbidden actions, expected artifacts, owner, budget, and done criteria.
    - For formal specs, start from `references/loop-spec-template.yaml`.
-3. Build the context map.
+3. Define the implementation toolchain.
+   - Decide whether the loop needs scaffolding, code patterns, eval generation, deploy, publish or registry, observability, and CI/CD.
+   - Package these as explicit capability slots in the manifest so the loop does not depend on hidden context or ad hoc terminal memory.
+   - If the loop spans editor, terminal, browser, cloud console, and eval tooling, consolidate the workflow into a single runbook and state artifact.
+4. Build the context map.
    - Use AGENTS.md or equivalent as the entrypoint and keep it short.
    - Put detailed knowledge in repo-local docs, runbooks, skills, memory, logs, prior run reports, and decision records.
    - Include freshness checks for stale docs and context drift.
-4. Design the harness.
+5. Design the harness.
    - Limit tools, files, network, secrets, deployment, and write permissions by task.
    - Prefer isolated worktrees or sandboxes for coding loops.
    - Add checkpoints when work may cross sessions or context windows.
-5. Design loop brakes before scheduling.
+6. Design loop brakes before scheduling.
    - Add max iterations, runtime timeout, token or cost ceiling, no-progress detection, and an automated completion check.
    - Treat repeated identical tool calls, unchanged diffs, identical errors, or no new evidence as no-progress signals.
    - Make retry decisions depend on new evidence, not on model confidence.
-6. Protect context quality.
+7. Protect context quality.
    - Treat context as a budget, not a bucket.
    - Compact long runs, offload bulky outputs to files, and return only the slice needed for the next decision.
    - Use subagents or isolated passes for messy subtasks so only clean findings re-enter the main loop.
    - Persist durable state separately from transient reasoning.
-7. Design tools for loops.
+8. Design tools for loops.
    - Keep tools few, focused, and non-overlapping.
    - Require idempotent writes or explicit duplicate guards for side-effecting tools.
    - Make tool errors actionable so the next turn knows the corrective action.
-8. Design verification before scheduling.
+9. Design verification before scheduling.
    - Separate generator and evaluator for important work.
    - Combine deterministic checks with semantic review where needed.
    - Do not accept self-grading for merges, customer sends, security changes, pricing, contracts, legal, production, or customer-impacting actions.
-9. Add the evaluation flywheel.
+10. Add the evaluation flywheel.
    - Start with 1-2 core evaluation cases, then expand to edge cases and adversarial cases.
    - Track failure categories so improvements target recurring failure modes, not anecdotes.
    - Compare baseline and candidate runs before calling a prompt, tool, or policy change an improvement.
-10. Run manually first.
+11. Run manually first.
    - Use a person-triggered loop until success rate, failure taxonomy, cost/task, retry rate, and escalation patterns are understood.
    - Schedule only after repeated manual runs show stable value and bounded risk.
-11. Observe the loop.
+12. Observe the loop.
    - Record run IDs, task IDs, tool calls, verification results, costs, retry reasons, and human escalation reasons.
    - Keep sensitive prompts and responses out of shared traces unless an explicit privacy policy allows them.
    - Feed observed failures back into the evaluation dataset.
-12. Persist and decide.
+13. Persist and decide.
    - Save progress logs, run logs, cost ledgers, verification results, decision records, commits, PRs, ticket comments, or drafts.
    - Make the next run able to understand what happened, why, what failed, and what must not be repeated.
 
@@ -79,6 +83,7 @@ Include these components unless there is a clear reason to omit one:
 - Work Finder: backlog, ticket, log, alert, PR, CRM, or document source that identifies candidate work.
 - Context Builder: minimal sufficient docs, code, policies, memory, and prior artifacts.
 - Manifest: versioned loop configuration, owner, lifecycle stage, allowed tools, eval threshold, and last verified date.
+- Scaffolder / Template Pack: repeatable project, prompt, eval, runbook, CI, or deployment skeletons that prevent blank-folder drift.
 - Agent Harness: tools, permissions, sandbox, checkout/worktree, network, secrets, and checkpoints.
 - Brakes: iteration, timeout, budget, no-progress, and completion-check controls.
 - Context Manager: compaction, offloading, state persistence, and stale-context controls.
@@ -89,6 +94,7 @@ Include these components unless there is a clear reason to omit one:
 - Failure Analyzer: clusters failed runs by failure mode and turns them into fixes or new eval cases.
 - Observability: traces, run logs, cost/token data, retry data, and privacy controls for operational review.
 - Persistence / Memory: progress file, git history, run log, cost ledger, decision record, ticket comment.
+- Publisher / Registry: optional registration, catalog entry, owner, IAM/access policy, and discoverability path after deployment.
 - Escalation: named conditions, owner, and handoff path for ambiguity, risk, budget, or repeated failure.
 
 ## Verification Layers
@@ -119,6 +125,7 @@ Stop or escalate when any of these apply:
 ## Resources
 
 - Read `references/loop-design-canvas.md` when creating or reviewing a new loop concept.
+- Read `references/agentic-engineering-toolchain.md` when designing scaffold, eval, deploy, publish/registry, observability, CI/CD, or multi-tool agent workflows.
 - Read `references/runtime-brakes-context-tools.md` when defining brakes, context compaction, no-progress detection, or loop-safe tools.
 - Read `references/evaluator-rubric.md` when defining quality gates or independent evaluators.
 - Read `references/loop-evaluation-quality-flywheel.md` when creating eval cases, metrics, failure taxonomy, or adversarial tests.
@@ -134,6 +141,7 @@ When producing a loop design, include:
 
 - Candidate fit assessment.
 - Minimal loop architecture.
+- Implementation toolchain with scaffold, eval, deploy, publish or registry, observability, and CI/CD decisions where applicable.
 - Loop spec or design canvas.
 - Verification plan with independent evidence.
 - Evaluation dataset plan with core, edge, regression, and adversarial cases.

@@ -23,6 +23,7 @@ Use this canvas before building or scheduling an agent loop.
 | Allowed tools | Include tool names and permission boundaries. |
 | Context entrypoint | Usually AGENTS.md, a runbook, a skill, or a ticket template. |
 | Required docs | Architecture, testing, product policy, support policy, security policy, or release policy. |
+| Toolchain | Mark scaffold, code patterns, eval, deploy, publish or registry, observability, and CI/CD as enabled or not applicable. |
 | Done criteria | State concrete pass/fail conditions. |
 | Verifier | Use tests, policy checks, evaluator rubric, reviewer agent, or human review. |
 | Escalation | Define when to stop and who receives the handoff. |
@@ -74,6 +75,7 @@ Do not add multi-agent routing, scheduling, or broad write permissions until man
 - The loop has explicit stop conditions.
 - The loop has brakes for iterations, timeout, budget, no-progress, and completion checks.
 - The loop treats context as a budget and has a compaction/offload plan.
+- The loop's toolchain slots are explicit, even when deploy or publish is marked not applicable.
 - Side-effecting tools are idempotent or protected by duplicate guards.
 - Tool errors are actionable enough to guide the next turn.
 - The loop has named human gates for risky decisions.

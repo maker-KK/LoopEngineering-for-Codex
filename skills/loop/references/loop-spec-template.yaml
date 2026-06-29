@@ -40,6 +40,47 @@ context:
     - "docs referenced by AGENTS.md exist"
     - "test command still matches repository scripts"
 
+implementation_toolchain:
+  lifecycle_verbs_enabled:
+    spec: true
+    scaffold: true
+    build: true
+    orchestrate: false
+    evaluate: true
+    deploy: false
+    publish: false
+    observe: true
+  capability_slots:
+    workflow_spec: "loop spec and AGENTS.md define goal, tools, constraints, and success criteria"
+    scaffold: "repo already exists; add loop artifacts, eval folders, run logs, and PR checklist instead of a blank project scaffold"
+    code_patterns: "follow repository coding and testing conventions"
+    eval: "generate traces, grade, compare baseline vs candidate, and analyze failure clusters"
+    deploy: "not allowed; this loop only creates a draft PR"
+    publish_registry: "draft PR and ticket comment are the discoverable handoff surfaces"
+    observability: "run-log.json, CI logs, per-category eval scores, cost, retries, and failure taxonomy"
+    cicd: "CI is the verification surface; do not change CI configuration without human approval"
+  scaffold_outputs:
+    - "loop-spec.yaml"
+    - "loop-manifest.yaml"
+    - "tests/eval/datasets/"
+    - "run-log.json"
+    - "progress.md"
+  deployment:
+    target: "draft_pr"
+    dry_run_required: true
+    smoke_test_required: true
+    deployment_metadata: "draft PR URL, commit hash, changed files, verification commands, rollback note"
+  publish_or_register:
+    required: true
+    surface: "draft PR linked from source ticket"
+    owner_visible: true
+    access_policy: "repository reviewers only"
+  observability_exports:
+    - "trace or run log for each iteration"
+    - "per-tool call counts"
+    - "per-category eval score table"
+    - "root-cause finding and changed instruction/tool/policy line"
+
 execution:
   agent: "coding-agent"
   topology: "single-agent"
@@ -90,6 +131,19 @@ tool_design:
 evaluation:
   dataset: "tests/eval/datasets/daily-regression-fix-loop.yaml"
   minimum_score: 0.85
+  scenario_generation:
+    target_case_count: 20
+    categories:
+      correct_behavior: 6
+      insufficient_context_or_ambiguous_input: 5
+      multi_step_or_multi_tool: 5
+      citation_or_evidence_accuracy: 4
+    synthesize_when_dataset_is_sparse: true
+  score_report:
+    require_per_category_means: true
+    require_top_findings: true
+    require_baseline_candidate_compare: true
+    require_failure_cluster_analysis: true
   required_case_types:
     - "core"
     - "edge"

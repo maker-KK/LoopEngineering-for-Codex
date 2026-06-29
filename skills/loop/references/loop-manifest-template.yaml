@@ -15,6 +15,32 @@ quality_bar:
     - "tests/eval/datasets/human-gates.yaml"
   adversarial_review_required: true
 
+toolchain:
+  package_model: "single loop skill with references, templates, and validation script"
+  lifecycle_verbs:
+    spec: true
+    scaffold: true
+    build: true
+    orchestrate: false
+    evaluate: true
+    deploy: false
+    publish: false
+    observe: true
+  capability_slots:
+    - "workflow_spec"
+    - "scaffold"
+    - "code_patterns"
+    - "eval"
+    - "observability"
+    - "cicd"
+  scaffold_artifacts:
+    - "loop-spec.yaml"
+    - "loop-manifest.yaml"
+    - "tests/eval/datasets/"
+    - "run-log.json"
+  deployment_surface: "draft_pr"
+  registry_surface: "ticket_or_pr_link"
+
 allowed_surface:
   tools:
     - "filesystem_read"
@@ -43,6 +69,9 @@ observability:
   prompt_response_logging: false
   cost_tracking: true
   failure_taxonomy_required: true
+  per_category_score_report_required: true
+  trace_tool_call_counts: true
+  deployment_or_registry_metadata_required: true
   privacy_review_required_when:
     - "customer_data_seen"
     - "secret_or_token_detected"

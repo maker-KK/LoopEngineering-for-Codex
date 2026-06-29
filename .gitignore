@@ -6,4 +6,4 @@ Thumbs.db
 .venv/
 venv/
 *.log
-
+.fablize-gpt-5-5-xhigh/

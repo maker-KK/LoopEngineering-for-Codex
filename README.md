@@ -12,6 +12,7 @@ Codex에서 반복 업무를 안전하게 설계하고 운영하기 위한 `loop
 - "AI가 끝났다고 말했다"가 아니라 실제 검증 기준으로 완료를 판단하게 합니다.
 - 실패 유형을 기록하고 다음 평가 데이터셋으로 되돌립니다.
 - 실행 로그, 비용, 도구 호출, 사람 개입 이유를 남기도록 설계합니다.
+- 스캐폴드, 평가, 배포, 등록, 관찰성을 하나의 운영 흐름으로 묶습니다.
 
 ## 설치 방법
 
@@ -53,6 +54,7 @@ skills/loop/
 |-- agents/
 |   `-- openai.yaml
 |-- references/
+|   |-- agentic-engineering-toolchain.md
 |   |-- evaluator-rubric.md
 |   |-- loop-design-canvas.md
 |   |-- loop-evaluation-quality-flywheel.md
@@ -98,5 +100,4 @@ python ".\skills\loop\scripts\validate_loop_spec.py" ".\skills\loop\references\l
 - Loop Engineering 통합 백서 기반 구조
 - Daily Dose of Data Science의 Loop Engineering 설명에서 정리한 brakes, context rot, tool safety
 - Andrej Karpathy의 agentic engineering 관점: 속도를 높이되 전문 품질 기준을 유지
-- Google `agents-cli`의 scaffold, eval, deploy, observe 생애주기 아이디어
-
+- Google `agents-cli`의 skill suite, scaffold, eval, deploy, publish, observe 생애주기 아이디어

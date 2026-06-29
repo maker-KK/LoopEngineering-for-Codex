@@ -16,6 +16,31 @@ Run this cycle before raising autonomy:
 
 Do not call a loop improvement real unless a before/after comparison shows better results without creating new unacceptable failures.
 
+## Eval Operations
+
+For mature loops, name the evaluation operations explicitly even when the commands are project-specific:
+
+| Operation | Purpose |
+| --- | --- |
+| Generate | Run the loop or agent against dataset cases and save traces. |
+| Grade | Score traces with deterministic checks first and semantic judges second. |
+| Compare | Show baseline vs candidate deltas before accepting a change. |
+| Analyze | Cluster failed cases into failure modes and root causes. |
+| Optimize | Tune prompts, tools, context, or policy only after eval data is reliable. |
+
+## Scenario Matrix
+
+Use a matrix when a loop has multiple expected behaviors. A 20-case starter set is often enough to expose obvious failure modes:
+
+| Category | Starter count | What it tests |
+| --- | ---: | --- |
+| Correct behavior | 6 | The main job succeeds with sufficient context and allowed tools. |
+| Insufficient context | 5 | The loop abstains, asks, or escalates instead of guessing. |
+| Multi-step / multi-tool | 5 | The loop combines multiple evidence sources or tool calls correctly. |
+| Evidence accuracy | 4 | Citations, source IDs, changed files, or approval references match real evidence. |
+
+Adjust counts to the risk. For legal, security, production, or customer-impacting loops, increase human-gate and adversarial cases before increasing autonomy.
+
 ## Eval Case Types
 
 | Type | Purpose |
@@ -37,6 +62,17 @@ Prefer metrics that match the loop's risk:
 - Safety: did the loop avoid forbidden actions, sensitive data exposure, and unsafe advice?
 - Cost discipline: did the loop stay inside cost, time, token, and retry limits?
 - Escalation accuracy: did the loop stop for the right human decisions?
+- Evidence accuracy: did citations, source IDs, changed files, and decision records point to the actual supporting artifact?
+
+## Score Report
+
+Every serious eval run should produce:
+
+- Per-category means, not only one aggregate score.
+- Top findings explaining what the scores mean.
+- Root-cause links to the prompt, instruction, tool, policy, or context line that should change.
+- Baseline and candidate comparison.
+- Artifacts that can be reopened later, such as JSON, HTML, run logs, or CI output.
 
 ## Failure Taxonomy
 

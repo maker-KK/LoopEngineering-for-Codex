@@ -19,6 +19,7 @@ REQUIRED_SECTIONS = [
     "trigger",
     "scope",
     "context",
+    "implementation_toolchain",
     "execution",
     "brakes",
     "context_management",
@@ -61,6 +62,7 @@ def validate(data: dict[str, Any]) -> list[str]:
         return errors
 
     loop = data["loop"]
+    implementation_toolchain = data["implementation_toolchain"]
     execution = data["execution"]
     brakes = data["brakes"]
     context_management = data["context_management"]
@@ -80,6 +82,34 @@ def validate(data: dict[str, Any]) -> list[str]:
         value = execution.get(key)
         if not isinstance(value, (int, float)) or value <= 0:
             errors.append(f"execution.{key} must be a positive number")
+
+    for key in ["lifecycle_verbs_enabled", "capability_slots", "scaffold_outputs", "deployment", "publish_or_register", "observability_exports"]:
+        if implementation_toolchain.get(key) in (None, "", [], {}):
+            errors.append(f"implementation_toolchain.{key} is required")
+
+    lifecycle_verbs = implementation_toolchain.get("lifecycle_verbs_enabled")
+    if isinstance(lifecycle_verbs, dict):
+        for key in ["spec", "scaffold", "build", "evaluate", "deploy", "publish", "observe"]:
+            if key not in lifecycle_verbs or not isinstance(lifecycle_verbs.get(key), bool):
+                errors.append(f"implementation_toolchain.lifecycle_verbs_enabled.{key} must be true or false")
+
+    if not has_nonempty_list(implementation_toolchain, "scaffold_outputs"):
+        errors.append("implementation_toolchain.scaffold_outputs must list generated or maintained artifacts")
+
+    if not has_nonempty_list(implementation_toolchain, "observability_exports"):
+        errors.append("implementation_toolchain.observability_exports must list trace, log, score, or metadata outputs")
+
+    deployment = implementation_toolchain.get("deployment")
+    if isinstance(deployment, dict):
+        for key in ["target", "dry_run_required", "smoke_test_required", "deployment_metadata"]:
+            if deployment.get(key) in (None, "", []):
+                errors.append(f"implementation_toolchain.deployment.{key} is required")
+
+    publish_or_register = implementation_toolchain.get("publish_or_register")
+    if isinstance(publish_or_register, dict):
+        for key in ["required", "surface", "owner_visible", "access_policy"]:
+            if publish_or_register.get(key) in (None, "", []):
+                errors.append(f"implementation_toolchain.publish_or_register.{key} is required")
 
     if not has_nonempty_list(verification, "required_checks"):
         errors.append("verification.required_checks must contain at least one independent check")
@@ -118,6 +148,21 @@ def validate(data: dict[str, Any]) -> list[str]:
     for key in ["dataset", "minimum_score", "required_case_types", "metrics", "failure_taxonomy"]:
         if evaluation.get(key) in (None, "", [], {}):
             errors.append(f"evaluation.{key} is required")
+
+    scenario_generation = evaluation.get("scenario_generation")
+    if isinstance(scenario_generation, dict):
+        target_case_count = scenario_generation.get("target_case_count")
+        if not isinstance(target_case_count, int) or target_case_count <= 0:
+            errors.append("evaluation.scenario_generation.target_case_count must be a positive integer")
+        categories = scenario_generation.get("categories")
+        if not isinstance(categories, dict) or not categories:
+            errors.append("evaluation.scenario_generation.categories must list scenario categories and counts")
+
+    score_report = evaluation.get("score_report")
+    if isinstance(score_report, dict):
+        for key in ["require_per_category_means", "require_top_findings", "require_baseline_candidate_compare", "require_failure_cluster_analysis"]:
+            if score_report.get(key) is not True:
+                errors.append(f"evaluation.score_report.{key} must be true")
 
     if not has_nonempty_list(evaluation, "required_case_types"):
         errors.append("evaluation.required_case_types must list core, edge, regression, human_gate, or adversarial cases")
