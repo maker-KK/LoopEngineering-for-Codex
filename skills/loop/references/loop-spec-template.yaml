@@ -1,0 +1,164 @@
+loop:
+  name: "daily-regression-fix-loop"
+  goal: "Analyze new regression failures and produce a safe draft PR."
+  owner: "loop-owner"
+  maturity_target: "manual-loop"
+  lifecycle_stage: "manual-run"
+  manifest: "loop-manifest.yaml"
+
+trigger:
+  type: "manual"
+  schedule: null
+  event_source: "ci_failures"
+  duplicate_run_guard: "one open run per failing test signature"
+
+scope:
+  repository: "product-app"
+  writable_paths:
+    - "src/"
+    - "tests/"
+  forbidden_paths:
+    - "infra/prod/"
+    - "secrets/"
+    - "billing/"
+  forbidden_decisions:
+    - "production deployment"
+    - "security exception approval"
+    - "customer-impacting communication"
+
+context:
+  entrypoint: "AGENTS.md"
+  required_docs:
+    - "docs/architecture.md"
+    - "docs/testing.md"
+    - "docs/release-policy.md"
+  recent_artifacts:
+    - "ci_failures"
+    - "last_5_commits"
+    - "open_incidents"
+  freshness_checks:
+    - "docs referenced by AGENTS.md exist"
+    - "test command still matches repository scripts"
+
+execution:
+  agent: "coding-agent"
+  topology: "single-agent"
+  max_iterations: 3
+  max_runtime_minutes: 45
+  max_cost_usd: 3.0
+  tools_allowed:
+    - "filesystem_read"
+    - "filesystem_write_limited"
+    - "test_runner"
+    - "git_diff"
+  tools_forbidden:
+    - "production_shell"
+    - "secret_store"
+    - "external_email"
+
+brakes:
+  completion_check: "unit tests and lint pass, no forbidden paths changed, draft PR includes cause and rollback notes"
+  timeout_policy: "stop and escalate when max_runtime_minutes is reached"
+  budget_policy: "stop and escalate when max_cost_usd is reached"
+  no_progress_detection:
+    repeated_tool_call_limit: 2
+    unchanged_diff_limit: 1
+    identical_failure_limit: 2
+    action: "compact context and escalate with run log"
+
+context_management:
+  max_active_context: "only evidence needed for the next decision"
+  compaction_trigger: "after each failed iteration or when logs/diffs exceed active context budget"
+  offload_targets:
+    - "logs/"
+    - "artifacts/"
+    - "run-log.json"
+  return_to_context:
+    - "root cause"
+    - "changed files"
+    - "verification result"
+    - "next action"
+  stale_context_policy: "restart from progress log when prior reasoning conflicts with current tests or files"
+
+tool_design:
+  focused_tool_count: true
+  non_overlapping_tools: true
+  idempotent_writes_required: true
+  duplicate_guard: "use task_id or failure signature as idempotency key before creating external records"
+  actionable_error_contract: "errors must include cause, retryability, and next corrective action"
+
+evaluation:
+  dataset: "tests/eval/datasets/daily-regression-fix-loop.yaml"
+  minimum_score: 0.85
+  required_case_types:
+    - "core"
+    - "edge"
+    - "regression"
+    - "human_gate"
+    - "adversarial"
+  metrics:
+    - "task_success"
+    - "tool_use_quality"
+    - "trajectory_quality"
+    - "safety"
+    - "cost_discipline"
+    - "escalation_accuracy"
+  failure_taxonomy:
+    - "missing_context"
+    - "wrong_tool"
+    - "verifier_gap"
+    - "unsafe_action"
+    - "context_rot"
+    - "no_progress"
+    - "cost_runaway"
+    - "escalation_gap"
+    - "quality_regression"
+
+observability:
+  run_log_schema: "references/loop-observability-run-log.md"
+  trace_tool_calls: true
+  trace_costs: true
+  trace_retries: true
+  prompt_response_logging: false
+  sensitive_content_policy: "do not store prompts, responses, secrets, customer data, or private documents unless policy explicitly permits it"
+  feedback_to_evals: "convert failed observed runs into regression eval cases"
+
+verification:
+  required_checks:
+    - "unit_tests"
+    - "lint"
+    - "forbidden_path_check"
+    - "reviewer_agent"
+  evaluator_rubric: "references/evaluator-rubric.md"
+  self_grade_allowed: false
+
+human_gate:
+  required_when:
+    - "prod_config_changed"
+    - "security_exception"
+    - "customer_impact"
+    - "legal_or_contract_judgment"
+    - "cost_budget_exceeded"
+  approver: "business-or-security-owner"
+
+persistence:
+  write:
+    - "progress.md"
+    - "run-log.json"
+    - "git_commit"
+    - "draft_pr"
+  audit_fields:
+    - "run_id"
+    - "trigger"
+    - "task_id"
+    - "context_hash"
+    - "tool_calls"
+    - "verification_results"
+    - "cost"
+    - "escalation_reason"
+
+stop:
+  on_success: "open_draft_pr"
+  on_failure: "escalate_to_loop_owner"
+  max_same_failure_count: 3
+  rollback_or_clean_state: "revert uncommitted changes and preserve run log"

@@ -1,0 +1,56 @@
+loop_manifest:
+  name: "daily-regression-fix-loop"
+  version: "0.1.0"
+  owner: "loop-owner"
+  verifier_owner: "verifier-owner"
+  lifecycle_stage: "manual-run"
+  last_verified: null
+  source_spec: "loop-spec.yaml"
+
+quality_bar:
+  description: "Preserve existing professional engineering quality while using agents to go faster."
+  minimum_eval_score: 0.85
+  required_eval_sets:
+    - "tests/eval/datasets/core.yaml"
+    - "tests/eval/datasets/human-gates.yaml"
+  adversarial_review_required: true
+
+allowed_surface:
+  tools:
+    - "filesystem_read"
+    - "filesystem_write_limited"
+    - "test_runner"
+    - "git_diff"
+  writable_paths:
+    - "src/"
+    - "tests/"
+  forbidden_paths:
+    - "infra/prod/"
+    - "secrets/"
+  forbidden_decisions:
+    - "production deployment"
+    - "pricing or contract judgment"
+    - "customer-impacting communication"
+
+operating_limits:
+  max_iterations: 3
+  max_runtime_minutes: 45
+  max_cost_usd: 3.0
+  max_same_failure_count: 2
+
+observability:
+  run_log: "run-log.json"
+  prompt_response_logging: false
+  cost_tracking: true
+  failure_taxonomy_required: true
+  privacy_review_required_when:
+    - "customer_data_seen"
+    - "secret_or_token_detected"
+
+human_gates:
+  required_when:
+    - "prod_config_changed"
+    - "security_exception"
+    - "customer_impact"
+    - "legal_or_contract_judgment"
+    - "cost_budget_exceeded"
