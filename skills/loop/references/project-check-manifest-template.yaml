@@ -1,0 +1,30 @@
+version: 1
+project: example-project
+default_timeout_seconds: 120
+fail_fast: true
+
+# Copy this file to .codex/project-check-manifest.yaml in the target project.
+# Keep commands project-local and prefer the same gates used by CI.
+# The commands below are examples for this Loop skill package. Replace them in
+# a target project with that project's real lint, test, eval, and review gates.
+checks:
+  - id: skill-structure
+    phase: write
+    command: 'python "%USERPROFILE%\.codex\skills\.system\skill-creator\scripts\quick_validate.py" "%USERPROFILE%\.codex\skills\loop"'
+    required: true
+    timeout_seconds: 120
+    description: "Validate skill frontmatter and folder shape."
+
+  - id: loop-spec-template
+    phase: pr
+    command: "python scripts/validate_loop_spec.py references/loop-spec-template.yaml"
+    required: true
+    timeout_seconds: 120
+    description: "Validate the bundled loop spec template."
+
+  - id: full-test-suite
+    phase: merge
+    command: "echo Replace this with the project CI-equivalent command"
+    required: false
+    timeout_seconds: 300
+    description: "Project-specific full gate before merge readiness."

@@ -12,6 +12,7 @@
 ```powershell
 python "$HOME\.codex\skills\.system\skill-creator\scripts\quick_validate.py" ".\skills\loop"
 python ".\skills\loop\scripts\validate_loop_spec.py" ".\skills\loop\references\loop-spec-template.yaml"
+python ".\skills\loop\scripts\run_in_loop_checks.py" --manifest ".\skills\loop\references\project-check-manifest-template.yaml" --phase all --dry-run --cwd ".\skills\loop"
 ```
 
 ## 품질 기준

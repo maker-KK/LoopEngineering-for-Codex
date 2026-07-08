@@ -1,7 +1,7 @@
 interface:
   display_name: "Loop Engineering"
-  short_description: "Design verified agent operating loops"
-  default_prompt: "Use $loop to design a verified agent loop for a recurring workflow."
+  short_description: "Design verified loops with in-loop gates"
+  default_prompt: "Use $loop to design a verified agent loop with in-loop checks for a recurring workflow."
 
 policy:
   allow_implicit_invocation: true

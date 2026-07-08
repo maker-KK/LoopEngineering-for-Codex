@@ -13,6 +13,7 @@ Codex에서 반복 업무를 안전하게 설계하고 운영하기 위한 `loop
 - 실패 유형을 기록하고 다음 평가 데이터셋으로 되돌립니다.
 - 실행 로그, 비용, 도구 호출, 사람 개입 이유를 남기도록 설계합니다.
 - 스캐폴드, 평가, 배포, 등록, 관찰성을 하나의 운영 흐름으로 묶습니다.
+- 코딩, 문서, 프롬프트, 설정 작업은 작성 중에 바로 검사하는 In-Loop Verification 구조로 설계합니다.
 
 ## 설치 방법
 
@@ -56,14 +57,17 @@ skills/loop/
 |-- references/
 |   |-- agentic-engineering-toolchain.md
 |   |-- evaluator-rubric.md
+|   |-- in-loop-verification.md
 |   |-- loop-design-canvas.md
 |   |-- loop-evaluation-quality-flywheel.md
 |   |-- loop-lifecycle.md
 |   |-- loop-manifest-template.yaml
 |   |-- loop-observability-run-log.md
+|   |-- project-check-manifest-template.yaml
 |   |-- loop-spec-template.yaml
 |   `-- runtime-brakes-context-tools.md
 `-- scripts/
+    |-- run_in_loop_checks.py
     `-- validate_loop_spec.py
 ```
 
@@ -93,6 +97,12 @@ Loop spec 템플릿 검증:
 
 ```powershell
 python ".\skills\loop\scripts\validate_loop_spec.py" ".\skills\loop\references\loop-spec-template.yaml"
+```
+
+In-Loop 검사 목록 실행 예시:
+
+```powershell
+python ".\skills\loop\scripts\run_in_loop_checks.py" --manifest ".\skills\loop\references\project-check-manifest-template.yaml" --phase all --dry-run --cwd ".\skills\loop"
 ```
 
 ## 참고한 방향

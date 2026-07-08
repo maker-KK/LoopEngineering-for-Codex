@@ -1,6 +1,6 @@
 ---
 name: loop
-description: Design, review, implement, or operate Loop Engineering systems for agentic AI workflows. Use when asked to create a Loop, loop spec, recurring agent workflow, autonomous or scheduled agent run, verifier/evaluator, eval dataset, quality flywheel, run ledger, observability plan, failure taxonomy, loop manifest, escalation policy, scaffold/eval/deploy/publish workflow, agent toolchain, cost/permission controls, 30/60/90 rollout, or when converting repeated prompt-driven work into a verified agent operating loop across Codex, MCP, CI, ticketing, support, sales, IT operations, documentation, or customer workflows.
+description: Design, review, implement, or operate Loop Engineering systems for agentic AI workflows. Use when asked to create a Loop, loop spec, recurring agent workflow, autonomous or scheduled agent run, in-loop verification, CI-equivalent write-time checks, PR repair loops, verifier/evaluator, eval dataset, quality flywheel, run ledger, observability plan, failure taxonomy, loop manifest, escalation policy, scaffold/eval/deploy/publish workflow, agent toolchain, cost/permission controls, 30/60/90 rollout, or when converting repeated prompt-driven work into a verified agent operating loop across Codex, MCP, CI, ticketing, support, sales, IT operations, documentation, or customer workflows.
 ---
 
 # Loop Engineering
@@ -10,6 +10,8 @@ Use this skill to turn repeated prompt-driven agent work into a verified operati
 ## Core Rule
 
 Design for verifiability before autonomy. A model ending its turn is not proof that the task is complete. Preserve the professional quality bar while using agents to go faster. If a loop lacks an independent verifier, explicit brake, state artifact, context management plan, evaluation dataset, observability path, or human escalation path for risky decisions, keep it manual or advisory.
+
+For code, config, prompt, or document-generation loops, prefer In-Loop Verification over after-the-fact review: run the relevant checks while the work is being written, fix failures before adding more work on top, and only advance when the project-local gate passes or a human accepts the risk.
 
 ## Workflow
 
@@ -48,20 +50,37 @@ Design for verifiability before autonomy. A model ending its turn is not proof t
    - Separate generator and evaluator for important work.
    - Combine deterministic checks with semantic review where needed.
    - Do not accept self-grading for merges, customer sends, security changes, pricing, contracts, legal, production, or customer-impacting actions.
-10. Add the evaluation flywheel.
+10. Add in-loop verification for artifacts that can be checked.
+   - Use a project-local check manifest for write-time, PR, and merge gates.
+   - Run fast checks after meaningful edits and full checks before merge readiness.
+   - Treat failing required checks as stop signals until fixed, narrowed, or escalated.
+11. Add the evaluation flywheel.
    - Start with 1-2 core evaluation cases, then expand to edge cases and adversarial cases.
    - Track failure categories so improvements target recurring failure modes, not anecdotes.
    - Compare baseline and candidate runs before calling a prompt, tool, or policy change an improvement.
-11. Run manually first.
+12. Run manually first.
    - Use a person-triggered loop until success rate, failure taxonomy, cost/task, retry rate, and escalation patterns are understood.
    - Schedule only after repeated manual runs show stable value and bounded risk.
-12. Observe the loop.
+13. Observe the loop.
    - Record run IDs, task IDs, tool calls, verification results, costs, retry reasons, and human escalation reasons.
    - Keep sensitive prompts and responses out of shared traces unless an explicit privacy policy allows them.
    - Feed observed failures back into the evaluation dataset.
-13. Persist and decide.
+14. Persist and decide.
    - Save progress logs, run logs, cost ledgers, verification results, decision records, commits, PRs, ticket comments, or drafts.
    - Make the next run able to understand what happened, why, what failed, and what must not be repeated.
+
+## In-Loop Verification Mode
+
+Use this mode when a loop edits code, configs, prompts, specs, docs, or generated artifacts that can be checked before the work is considered ready.
+
+Minimum requirements:
+
+- A project-local check manifest, usually `.codex/project-check-manifest.yaml`.
+- A runnable gate for `write`, `pr`, or `merge` phase.
+- A failure response that stops compounding changes on top of a known failure.
+- A run log that records command, exit code, duration, and output excerpt.
+
+Use `references/in-loop-verification.md` for the operating model and `references/project-check-manifest-template.yaml` as the starting manifest. Run `scripts/run_in_loop_checks.py --manifest <manifest> --phase write` after meaningful edits when the target project has a manifest.
 
 ## Five Loop Actions
 
@@ -90,6 +109,7 @@ Include these components unless there is a clear reason to omit one:
 - Tool Contract: focused tool list, idempotent writes, duplicate guards, and actionable errors.
 - Generator: the agent run that produces the change, report, draft, ticket update, or other artifact.
 - Verifier / Evaluator: tests, lint, policy checks, security scans, independent LLM review, or human gate.
+- In-Loop Gate Runner: project-local write-time, PR, and merge checks that run before failures compound.
 - Evaluation Dataset: core, edge, regression, and adversarial cases used to check changes over time.
 - Failure Analyzer: clusters failed runs by failure mode and turns them into fixes or new eval cases.
 - Observability: traces, run logs, cost/token data, retry data, and privacy controls for operational review.
@@ -127,13 +147,16 @@ Stop or escalate when any of these apply:
 - Read `references/loop-design-canvas.md` when creating or reviewing a new loop concept.
 - Read `references/agentic-engineering-toolchain.md` when designing scaffold, eval, deploy, publish/registry, observability, CI/CD, or multi-tool agent workflows.
 - Read `references/runtime-brakes-context-tools.md` when defining brakes, context compaction, no-progress detection, or loop-safe tools.
+- Read `references/in-loop-verification.md` when the loop should check work as it is written, repair PRs before merge, or mirror CI gates inside the work cycle.
 - Read `references/evaluator-rubric.md` when defining quality gates or independent evaluators.
 - Read `references/loop-evaluation-quality-flywheel.md` when creating eval cases, metrics, failure taxonomy, or adversarial tests.
 - Read `references/loop-lifecycle.md` when moving from concept to manual run, scheduled run, deployment, or continuous improvement.
 - Read `references/loop-observability-run-log.md` when defining run logs, trace fields, privacy boundaries, or production feedback.
 - Use `references/loop-spec-template.yaml` when the output should be a concrete loop specification.
 - Use `references/loop-manifest-template.yaml` when the loop should have a versioned configuration artifact.
+- Use `references/project-check-manifest-template.yaml` when a project needs a local write-time, PR, and merge check manifest.
 - Run `scripts/validate_loop_spec.py <spec.yaml>` when a loop spec file exists.
+- Run `scripts/run_in_loop_checks.py --manifest <manifest> --phase <write|pr|merge|all>` when a project-local in-loop check manifest exists.
 
 ## Output Expectations
 
@@ -144,6 +167,7 @@ When producing a loop design, include:
 - Implementation toolchain with scaffold, eval, deploy, publish or registry, observability, and CI/CD decisions where applicable.
 - Loop spec or design canvas.
 - Verification plan with independent evidence.
+- In-loop verification plan with write-time, PR, and merge gates when the task edits checkable artifacts.
 - Evaluation dataset plan with core, edge, regression, and adversarial cases.
 - Brake plan with max iteration, timeout, budget, no-progress, and completion-check controls.
 - Context management and compaction/offloading plan.
